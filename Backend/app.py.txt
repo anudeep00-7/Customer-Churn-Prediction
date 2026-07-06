@@ -1,0 +1,55 @@
+import numpy as np
+import joblib
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+try:
+    model = joblib.load('churn_model.pkl')
+    scaler = joblib.load('scaler.pkl')
+except Exception:
+    model = None
+    scaler = None
+
+class CustomerData(BaseModel):
+    tenure: float
+    monthly_charges: float
+    total_charges: float
+    contract_month_to_month: int
+    tech_support_yes: int
+
+@app.post("/predict")
+def predict_churn(data: CustomerData):
+    if model is None or scaler is None:
+        raise HTTPException(status_code=500, detail="Model weights are missing. Run train.py first.")
+    
+    input_features = np.array([[
+        data.tenure,
+        data.monthly_charges,
+        data.total_charges,
+        data.contract_month_to_month,
+        data.tech_support_yes
+    ]])
+    
+    scaled_features = scaler.transform(input_features)
+    prediction = int(model.predict(scaled_features)[0])
+    probability = float(model.predict_proba(scaled_features)[0][1])
+    
+    return {
+        "churn_prediction": prediction,
+        "churn_probability": round(probability * 100, 2)
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002)

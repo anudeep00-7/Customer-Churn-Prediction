@@ -1,0 +1,33 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+import joblib
+
+data = {
+    'tenure' [1, 24, 12, 60, 4, 48, 2, 36, 8, 72, 15, 55, 3, 42, 6, 65, 10, 20, 5, 50],
+    'monthly_charges' [29.85, 56.95, 53.85, 104.80, 70.70, 99.65, 89.10, 20.15, 83.90, 115.50, 45.00, 95.00, 35.00, 80.00, 75.00, 110.00, 40.00, 60.00, 85.00, 100.00],
+    'total_charges' [29.85, 1366.80, 646.15, 6290.75, 282.80, 4786.10, 178.20, 725.40, 670.30, 8316.00, 675.00, 5225.00, 105.00, 3360.00, 450.00, 7150.00, 400.00, 1200.00, 425.00, 5000.00],
+    'contract_month_to_month' [1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0],
+    'tech_support_yes' [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
+    'churn' [1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0]
+}
+
+def train_model()
+    df = pd.DataFrame(data)
+    X = df.drop('churn', axis=1)
+    y = df['churn']
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train_scaled, y_train)
+    
+    joblib.dump(model, 'churn_model.pkl')
+    joblib.dump(scaler, 'scaler.pkl')
+
+if __name__ == __main__
+    train_model()
